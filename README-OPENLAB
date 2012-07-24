@@ -23,7 +23,14 @@ Finishing installation and first compilation
 To complete the installatin process you only need to add 
 a copy or a link to the openlab source code in 
 
-  /platform/openlab/git. 
+  /platform/openlab/git
+
+The link can be done quite easily on Unix using the following
+command:
+
+  ln -s [openlab path] [contiki path]/platform/openlab/git
+
+Windows may have to copy the whole source tree.
 
 Please refer to OpenLab installation notes for compiler and
 jtag setup.
@@ -39,3 +46,21 @@ links:
   HiKoB Openlab wiki and installation notes
 
          https://github.com/hikob/openlab/wiki
+
+
+
+Compilation and download
+========================
+
+new contiki TARGETs are openlab-fox and openlab-newt. The 
+prefered way to flash firmware is by using openocd. 
+
+Special make targets are pre-built to make everything easy.
+
+From a projetct you can use the following make command lines
+
+* building the firmware:    make TARGET=openlab-[xxx] prog
+* flash the firmware:       make TARGET=openlab-[xxx] prog.u
+
+* perform a reset:          make TARGET=openlab-[xxx] reset
+* enter GDB session mode:   make TARGET=openlab-[xxx] debug
