@@ -1,0 +1,41 @@
+
+This repository stores additions to the Contiki Operating System
+in order to support HiKoB Openlab platforms.
+
+Additions are done through new contiki platform definitions and
+the use of openlab low level drivers.
+
+All additional work can be found in 
+
+  /platform/openlab
+  /platform/openlab-fox
+  /platform/openlab-newt
+
+So far no other file has been modified in the repository and a
+simple copy of openlab directories to a contiki system should
+be enough if you want to merge this version with your already
+modified repository.
+
+
+Finishing installation and first compilation
+============================================
+
+To complete the installatin process you only need to add 
+a copy or a link to the openlab source code in 
+
+  /platform/openlab/git. 
+
+Please refer to OpenLab installation notes for compiler and
+jtag setup.
+  
+
+
+links: 
+
+  HiKoB Openlab git repository 
+
+         https://github.com/hikob/openlab
+
+  HiKoB Openlab wiki and installation notes
+
+         https://github.com/hikob/openlab/wiki

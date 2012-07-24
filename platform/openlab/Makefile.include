@@ -1,0 +1,101 @@
+# -*-makefile-*-
+#
+# This file is part of HiKoB Openlab.
+#
+# HiKoB Openlab is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public License
+# as published by the Free Software Foundation, version 3.
+#
+# HiKoB Openlab is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with HiKoB Openlab. If not, see
+# <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) 2011,2012 HiKoB.
+#
+
+GCCPREFIX = arm-none-eabi
+CC        = ${GCCPREFIX}-gcc
+LD        = ${GCCPREFIX}-gcc
+AS        = ${GCCPREFIX}-as
+AR        = ${GCCPREFIX}-ar
+NM        = ${GCCPREFIX}-nm
+OBJCOPY   = ${GCCPREFIX}-objcopy
+STRIP     = ${GCCPREFIX}-strip
+OBJDUMP   = ${GCCPREFIX}-objdump
+
+CFLAGS   += -DPLATFORM_OS=CONTIKI
+CFLAGS   += -DPLATFORM_TYPE=${PLATFORM_TYPE} -DPLATFORM_VERSION=${PLATFORM_VERSION}
+
+CFLAGS   += -Os
+CFLAGS   += -Wall
+CFLAGS   += -Wimplicit -Wcast-align -Wpointer-arith
+CFLAGS   += -Wredundant-decls -Wshadow -Wcast-qual -Wcast-align
+
+CFLAGS   += -DGCC_ARMCM3 -DENABLE_DEBUG=${DEBUG}
+CFLAGS   += -gdwarf-2 -fno-builtin -fsingle-precision-constant
+CFLAGS   += -mcpu=cortex-m3 -mthumb -mthumb-interwork -mfix-cortex-m3-ldrd -msoft-float
+
+LDFLAGS  += -nostartfiles
+LDFLAGS  += -nodefaultlibs
+LDFLAGS  += -T${LINKERSCRIPT} 
+LDFLAGS  += -mcpu=cortex-m3 -mthumb -mthumb-interwork
+
+PORT        = 123
+GDB_PORT    = 3${PORT}
+TELNET_PORT = 4${PORT}
+TCL_PORT    = 5${PORT}
+
+OOCD      = openocd
+
+%.od: %.$(TARGET)
+	$(OBJDUMP) -S $< > $@
+
+%.u: %.$(TARGET)
+	$(OOCD) \
+	-f "${OOCD_ITF}" \
+	-f "target/${OOCD_TARGET}.cfg" \
+	-c "gdb_port ${GDB_PORT}" \
+	-c "telnet_port ${TELNET_PORT}" \
+	-c "tcl_port ${TCL_PORT}" \
+	-c "init" \
+	-c "targets" \
+	-c "reset halt"	\
+	-c "reset init"	\
+	-c "flash write_image erase $<" \
+	-c "verify_image $<" \
+	-c "reset run" \
+	-c "shutdown"
+
+##
+## make debug will start a GDB SRP socket on port 3333
+##
+
+debug: 
+	$(OOCD) \
+	-f "${OOCD_ITF}" \
+	-f "target/${OOCD_TARGET}.cfg" \
+	-c "tcl_port ${TCL_PORT}" \
+	-c "telnet_port ${TELNET_PORT}" \
+	-c "init" \
+	-c "targets" \
+	-c "reset halt"
+
+reset: 
+	$(OOCD) \
+	-f "${OOCD_ITF}" \
+	-f "target/${OOCD_TARGET}.cfg" \
+	-c "gdb_port ${GDB_PORT}" \
+	-c "tcl_port ${TCL_PORT}" \
+	-c "telnet_port ${TELNET_PORT}" \
+	-c "init" \
+	-c "targets" \
+	-c "reset run" \
+	-c "shutdown"
+
+
+

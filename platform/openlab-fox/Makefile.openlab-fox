@@ -1,0 +1,157 @@
+# -*-makefile-*-
+#
+# This file is part of HiKoB Openlab.
+#
+# HiKoB Openlab is free software: you can redistribute it and/or
+# modify it under the terms of the GNU Lesser General Public License
+# as published by the Free Software Foundation, version 3.
+#
+# HiKoB Openlab is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
+# Lesser General Public License for more details.
+#
+# You should have received a copy of the GNU Lesser General Public
+# License along with HiKoB Openlab. If not, see
+# <http://www.gnu.org/licenses/>.
+#
+# Copyright (C) 2011,2012 HiKoB.
+#
+
+OPENLAB = $(CONTIKI)/platform/openlab
+
+DEBUG            = 1
+CFLAGS          += -DAGILE_FOX 
+PLATFORM_TYPE    = 0x07
+PLATFORM_VERSION = 0x10
+LINKERSCRIPT     = $(OPENLAB)/git/platform/scripts/stm32f103rey6.ld
+
+OOCD_TARGET      = stm32f1x
+OOCD_ITF         = $(OPENLAB)/git/platform/scripts/mysticjtag.cfg
+
+include $(OPENLAB)/Makefile.include
+
+## 
+## Openlab sources
+##
+
+OPENLAB_INCLUDE_PATH += \
+	-I$(OPENLAB)/git                	\
+	-I$(OPENLAB)/git/drivers/cortex-m3	\
+	-I$(OPENLAB)/git/drivers/stm32		\
+	-I$(OPENLAB)/git/drivers/stm32f1xx	\
+
+OPENLAB_TARGET_DIRS  += . 			\
+	$(OPENLAB)				\
+	$(OPENLAB)/git/drivers			\
+	$(OPENLAB)/git/lib 			\
+	$(OPENLAB)/git/net 			\
+	$(OPENLAB)/git/periph 			\
+	$(OPENLAB)/git/platform
+
+OPENLAB_SRC += 					\
+	\
+	cortex-m3/boot.c			\
+	cortex-m3/nvic.c			\
+	\
+	stm32/dma.c				\
+	stm32/i2c.c				\
+	stm32/spi.c				\
+	stm32/timer.c				\
+	stm32/uart.c				\
+	stm32/unique_id.c			\
+	stm32/usb.c				\
+	stm32/watchdog.c			\
+	\
+	stm32f1xx/afio.c			\
+	stm32f1xx/boot.c			\
+	stm32f1xx/exti.c			\
+	stm32f1xx/flash.c			\
+	stm32f1xx/gpio.c			\
+	stm32f1xx/rcc.c				\
+	stm32f1xx/rcc_clock.c			\
+	stm32f1xx/rcc_sysclk.c			\
+	stm32f1xx/sdio.c			\
+	\
+	printf/printf.c				\
+	random/random.c				\
+	softtimer/soft_timer_delay.c		\
+	\
+	agile-fox/agilefox.c			\
+	agile-fox/agilefox_drivers.c		\
+	agile-fox/agilefox_lib.c		\
+	agile-fox/agilefox_periph.c		\
+	agile-fox/agilefox_button.c		\
+	agile-fox/agilefox_net.c		\
+	\
+	rf2xx/rf2xx.c				\
+	phy_rf2xx/phy_rf2xx.c			\
+	lps331/lps331.c				\
+	lsm303dlhc/lsm303dlhc.c			\
+	l3g4200d/l3g4200d.c			\
+
+##
+## Wrappers from Openlab to Contiki API
+##
+
+OPENLAB_CONTIKI_WRAPPERS +=			\
+	clock-systick.c				\
+	watchdog.c				\
+	radio-rf2xx.c				\
+	\
+	openlab-port.c				\
+	rtimer-arch.c				\
+	leds-arch.c				\
+	button-sensor.c				\
+
+ifndef CONTIKI_TARGET_MAIN
+CONTIKI_TARGET_MAIN += openlab-main.c
+endif
+
+##
+## Contiki apps and drivers 
+##
+
+CONTIKI_SRC += 					\
+	leds.c 					\
+	sensors.c
+
+##
+## Full source setup
+##
+
+CONTIKI_TARGET_DIRS += $(OPENLAB_TARGET_DIRS)
+
+CONTIKI_TARGET_SOURCEFILES +=  			\
+	$(OPENLAB_SRC)		 		\
+	$(OPENLAB_CONTIKI_WRAPPERS)		\
+	$(CONTIKI_SRC)                          \
+	$(CONTIKI_TARGET_MAIN) 
+
+CONTIKI_SOURCEFILES += $(CONTIKI_TARGET_SOURCEFILES) 
+
+##
+## We need to redefine the default compilation target so
+## that the build process is not confused 
+##
+
+OPENLAB_PLATFORM_SUBDIR=${dir $(OPENLAB_SRC)}
+
+define OPENLAB_OBJECTDIR
+for i in $(OPENLAB_PLATFORM_SUBDIR) ;   \
+do					\
+	mkdir -p $(OBJECTDIR)/$$i ; 	\
+done
+endef
+
+CUSTOM_RULE_C_TO_OBJECTDIR_O = "defined"
+$(OBJECTDIR)/%.o: %.c
+	@$(OPENLAB_OBJECTDIR)
+	$(CC) $(CFLAGS) $(OPENLAB_INCLUDE_PATH) -MMD -c $< -o $@
+	@$(FINALIZE_DEPENDENCY)
+
+##
+##
+##
+
+
