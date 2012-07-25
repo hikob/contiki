@@ -269,7 +269,6 @@ static void tx_done(phy_status_t status)
 }
 
 /*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
 
 static void rx_done(phy_status_t status)
 {
@@ -292,48 +291,20 @@ static void rx_done(phy_status_t status)
             // Weird status
             break;
     }
-  process_poll(&rf2xx_process);
+    process_poll(&rf2xx_process);
 }
 
 /*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
-
-
 
 event_status_t event_post_from_isr(event_queue_t queue, handler_t event, handler_arg_t arg)
 {
     //log_debug("event post called %x %x",event,arg);
     event(arg);
 
-/*
-    if ((void*)event == (void*)tx_done)
-    {
-	log_debug("tx_done called");
-	HALT();
-    }
-
-    if (rf2xx_event_list[rf2xx_event_wptr].event != NULL)
-    {
-	log_error("rf2xx_event != NULL, overwriting pending event");
-    }
-
-    rf2xx_event_list[rf2xx_event_wptr].event = event;
-    rf2xx_event_list[rf2xx_event_wptr].arg = arg;
-    log_debug("event_post %d :: %d",rf2xx_event_wptr,soft_timer_time());
-
-    rf2xx_event_wptr = rf2xx_event_wptr % RF2XX_EVENT_SIZE;
-    rf2xx_event_size = rf2xx_event_size + 1;
-    
-    process_poll(&rf2xx_process);
-*/
-
     return EVENT_OK;
 }
 
 /*---------------------------------------------------------------------------*/
-/*---------------------------------------------------------------------------*/
-
 
 PROCESS_THREAD(rf2xx_process, ev, data)
 {
