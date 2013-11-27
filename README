@@ -1,3 +1,20 @@
+
+===========================================================
+= Warning
+=
+= This repository is a fork from the Contiki-OS located at 
+=    contiki.git.sourceforge.net/gitroot/contiki/contiki
+= commit a3e56371a59e27f49464b41cdebc30c5e0ef00c1
+=
+= This fork supports Contiki 2.6 and must be used with
+= Openlab Release 2012.07
+=
+= The fork os the official Contiki GIT repository hosted on Github
+= is available at https://github.com/hikob/contiki-os
+=
+=============================================================
+
+
 The Contiki Operating System
 
 Contiki is an open source operating system that runs on tiny low-power
